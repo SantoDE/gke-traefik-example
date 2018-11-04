@@ -1,0 +1,29 @@
+# define Traefik configuration
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: traefik-config
+  namespace: kube-system
+data:
+  traefik.toml: |
+    # traefik.toml
+    defaultEntryPoints = ["http", "https"]
+    [entryPoints]
+      [entryPoints.http]
+      address = ":80"  
+      [entryPoints.https]
+      address = ":443"
+        [entryPoints.https.tls]
+    [kubernetes]
+    ingressClass = "traefik"
+      [kubernetes.ingressEndpoint]
+      publishedService = "kube-system/traefik-ingress-controller"
+    [acme]
+    email = "me@mydomain.com"
+    entryPoint = "https"
+    onHost = "true"
+    storage = "/etc/traefik/acme/acme.json"
+      [acme.dnsChallenge]
+      provider = "digitalocean"
+    [[acme.domains]]
+      main = "my.domain.tld"

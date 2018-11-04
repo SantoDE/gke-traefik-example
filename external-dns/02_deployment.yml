@@ -1,0 +1,23 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: external-dns
+  namespace: kube-system
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: external-dns
+    spec:
+      serviceAccountName: external-dns
+      containers:
+      - name: external-dns
+        image: registry.opensource.zalan.do/teapot/external-dns:latest
+        args:
+        - --source=ingress
+        - --provider=digitalocean
+        env:
+        - name: DO_TOKEN
+          value: "81b4576f07c27633ef02e4861fb56528012b93c53dfd2249b70194bc7dc7ecc2"

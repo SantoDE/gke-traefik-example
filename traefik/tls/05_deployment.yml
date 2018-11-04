@@ -1,0 +1,44 @@
+# declare Traefik deployment
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: traefik-ingress-controller
+  namespace: kube-system
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: traefik-ingress-controller
+    spec:
+      serviceAccountName: traefik-ingress-controller
+      terminationGracePeriodSeconds: 60
+      volumes:
+        - name: config
+          configMap:
+            name: traefik-config
+        - name: storage
+          persistentVolumeClaim:
+            claimName: traefik-volumeclaim
+        - name: traefik-auth
+          secret:
+            secretName: traefik-dashboard-auth
+      containers:
+      - name: traefik
+        image: "traefik:1.7"
+        #image: santode/traefik:no_path_host
+        volumeMounts:
+          - mountPath: "/etc/traefik/config"
+            name: config
+          - mountPath: "/etc/traefik/acme/"
+            name: storage
+          - name: traefik-auth
+            mountPath: "/etc/traefik/auth/"
+            readOnly: true
+        args:
+        - --configfile=/etc/traefik/config/traefik.toml
+        - --api
+        - --logLevel=DEBUG
+        env:
+        - name: DO_AUTH_TOKEN
+          value: "XXXX"
